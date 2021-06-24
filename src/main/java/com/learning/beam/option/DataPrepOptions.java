@@ -10,7 +10,7 @@ import org.apache.beam.sdk.options.PipelineOptions;
 public interface DataPrepOptions extends PipelineOptions {
 
     @Description("Path of the file to configure the behavior of processing data")
-    @Default.String("src/main/resources/profile/profile.yaml")
+    @Default.String("src/main/resources/profiles/profile.yaml")
     String getProfile();
 
     void setProfile(String value);

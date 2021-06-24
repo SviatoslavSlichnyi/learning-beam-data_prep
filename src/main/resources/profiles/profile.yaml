@@ -1,0 +1,44 @@
+layouts:
+  USER:
+    accountId: string
+    name: string
+    age: long
+  BALANCE:
+    accountId: string
+    description: string
+    balance: long
+  USER_AND_BALANCE:
+    name: string
+    age: long
+    accountId: string
+    description: string
+    balance: long
+
+actions:
+  - type: validate
+    recordType: "USER"
+    field: accountId
+    constraint: com.example.validation.NonNull
+  - type: validate
+    recordType: "BALANCE"
+    field: accountId
+    constraint: com.example.validation.NonNull
+  - type: validate
+    recordType: "BALANCE"
+    field: balance
+    constraint: com.example.validation.Positive
+  - type: groupBy
+    recordTypes:
+      - USER
+      - BALANCE
+    gropingKey: accountId
+    resultRecordName: USER_AND_BALANCE
+  - type: mapToAvro
+    sourceLayout: USER_AND_BALANCE
+    targetSchema: CreditFile.avro
+    mapping:
+      name: user.name
+      age: user.age
+      accountId: account.number
+      description: account.description
+      balance: account.balance

@@ -1,8 +1,10 @@
 package com.learning.beam.entity;
 
-import java.util.List;
+public interface Table {
 
-public class Table {
-    List<Column> columns;
+    String getType();
 
+    String get(String fieldName);
+
+    String getFieldType(String fieldName);
 }
