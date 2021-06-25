@@ -35,8 +35,18 @@ public class MapTable implements Table {
     }
 
     @Override
+    public Map<String, String> getRows() {
+        return rows;
+    }
+
+    @Override
     public String getFieldType(String fieldName) {
         return fieldsType.get(fieldName);
+    }
+
+    @Override
+    public Map<String, String> getFieldsType() {
+        return fieldsType;
     }
 
     @Override
