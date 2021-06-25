@@ -1,4 +1,4 @@
-package com.learning.beam.tranform;
+package com.learning.beam.transform;
 
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PBegin;

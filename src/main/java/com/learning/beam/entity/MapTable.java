@@ -38,4 +38,14 @@ public class MapTable implements Table {
     public String getFieldType(String fieldName) {
         return fieldsType.get(fieldName);
     }
+
+    @Override
+    public boolean containsField(String fieldName) {
+        return rows.containsKey(fieldName);
+    }
+
+    @Override
+    public boolean containsFieldType(String fieldName) {
+        return fieldsType.containsKey(fieldName);
+    }
 }
