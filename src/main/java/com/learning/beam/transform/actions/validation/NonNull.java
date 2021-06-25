@@ -15,8 +15,6 @@ public class NonNull implements ValidationConstraint {
         if (!containsField) return false;
 
         String fieldValue = table.get(fieldName);
-        if (Strings.isBlank(fieldValue)) return false;
-
-        return true;
+        return Strings.isNotBlank(fieldValue);
     }
 }
