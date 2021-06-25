@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ValidationActionTransform extends DoFn<Table, Table> {
+public class ValidationActionDoFn extends DoFn<Table, Table> {
 
     private final Map<String, ValidationConstraint> constraintList;
     private final Map<String, List<Map<String, String>>> actionsByRecordType;
 
-    public ValidationActionTransform() {
+    public ValidationActionDoFn() {
         this.constraintList = initValidationRules();
         List<Map<String, String>> actions = ProfileConfigs.getActions();
         this.actionsByRecordType = groupValidationActionsByRecordType(actions);
