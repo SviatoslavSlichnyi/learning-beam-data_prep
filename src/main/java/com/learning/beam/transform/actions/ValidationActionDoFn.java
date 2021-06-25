@@ -38,18 +38,23 @@ public class ValidationActionDoFn extends DoFn<Table, Table> {
         return constraints;
     }
 
-
     @ProcessElement
     public void processElement(@Element Table table, OutputReceiver<Table> receiver) {
         String recordType = table.getType(); // BALANCE
         List<Map<String, String>> actionToApply = actionsByRecordType.get(recordType);
 
-        actionToApply.forEach(act -> {
+        boolean isValid = true;
+
+        for (Map<String, String> act : actionToApply) {
             String constraint = act.get("constraint");
             ValidationConstraint validationConstraint = constraintList.get(constraint);
-            validationConstraint.validate(table, act);
-        });
+            boolean validationResult = validationConstraint.validate(table, act);
+            if (!validationResult) {
+                isValid = false;
+                break;
+            }
+        }
 
-        receiver.output(table);
+        if (isValid) receiver.output(table);
     }
 }

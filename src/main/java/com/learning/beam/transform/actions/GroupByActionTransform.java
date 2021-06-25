@@ -7,6 +7,10 @@ import org.apache.beam.sdk.values.PCollection;
 public class GroupByActionTransform extends PTransform<PCollection<Table>, PCollection<Table>> {
     @Override
     public PCollection<Table> expand(PCollection<Table> input) {
+        // https://beam.apache.org/documentation/transforms/java/aggregation/cogroupbykey/
+
+
+
         return null;
     }
 }
