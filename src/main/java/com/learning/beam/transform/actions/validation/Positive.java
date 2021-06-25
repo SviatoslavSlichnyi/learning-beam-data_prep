@@ -1,16 +1,16 @@
 package com.learning.beam.transform.actions.validation;
 
 import com.learning.beam.entity.Table;
+import com.learning.beam.entity.config.ProfileConfig;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class Positive implements ValidationConstraint {
     @Override
-    public boolean validate(Table table, Map<String, String> validationActionConfigs) {
-        String fieldName = validationActionConfigs.get("field"); // example: balance
+    public boolean validate(Table table, ProfileConfig.Action.ValidationAction validationActionConfigs) {
+        String fieldName = validationActionConfigs.getField(); // example: balance
 
         // validate: field exists
         boolean containsField = table.containsField(fieldName);
@@ -26,7 +26,7 @@ public class Positive implements ValidationConstraint {
 
         String fieldValueString = table.get(fieldName);
 
-        return isPositive(fieldValueString, fieldType);
+        return isPositive(fieldValueString);
     }
 
     private boolean isNotNumberType(String fieldType) {
@@ -46,7 +46,7 @@ public class Positive implements ValidationConstraint {
         return numberFieldTypes.contains(fieldType);
     }
 
-    private boolean isPositive(String fieldValueString, String fieldType) {
+    private boolean isPositive(String fieldValueString) {
         BigDecimal number = new BigDecimal(fieldValueString);
         return number.compareTo(BigDecimal.ZERO) > 0;
     }

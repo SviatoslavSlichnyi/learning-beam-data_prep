@@ -23,20 +23,20 @@ BALANCE, account1, Active, 200
 
 в profile.yaml потрібно дати назву полям, в форматі:
 layouts:
-	USER:
-		accountId: string
-		name: string
-		age: long
-	BALANCE:
-		accountId: string
-		description: string
-		balance: long 
-	USER_AND_BALANCE: // цей Layout суто для групування в source файлах таких типів рекордві не має бути 
-		name: string 
-		age: long 
-		accountId: string 
-		description: string 
-		balance: long 
+  USER:
+    accountId: string
+    name: string
+    age: long
+  BALANCE:
+    accountId: string
+    description: string
+    balance: long
+  USER_AND_BALANCE:
+    name: string
+    age: long
+    accountId: string
+    description: string
+    balance: long 
 
 
 а також описати дії які потрібно зробити з кожним рекордом з вхідного файлу щоб замапити на target avro record 
@@ -44,34 +44,34 @@ layouts:
 
 
 приклад конфігурації: 
-actions: 
-    - type: validate
-        recordType: USER 
-        field: accountId 
-        constraint: com.example.validation.NonNull
-    - type: validate 
-        recordType: BALANCE 
-        field: accountId 
-        constraint: com.example.validation.NonNull
-    - type: validate 
-        recordType: BALANCE 
-        field: balance 
-        constraint: com.example.validation.Positive
-    - type: groupBy
-        recordTypes:
-            - USER 
-            - BALANCE 
-        gropingKey: accountId
-        resultRecordName: USER_AND_BALANCE 
-    - type: mapToAvro 
-        sourceLayout: USER_AND_BALANCE 
-        targetSchema: CreditFile.avro 
-        mapping: 
-            name: user.name 
-            age: user.age 
-            accountId: account.number 
-            description: account.description 
-            balance: account.balance
+actions:
+  - type: validate
+    recordType: "USER"
+    field: accountId
+    constraint: com.example.validation.NonNull
+  - type: validate
+    recordType: "BALANCE"
+    field: accountId
+    constraint: com.example.validation.NonNull
+  - type: validate
+    recordType: "BALANCE"
+    field: balance
+    constraint: com.example.validation.Positive
+  - type: groupBy
+    recordTypes:
+      - USER
+      - BALANCE
+    gropingKey: accountId
+    resultRecordName: USER_AND_BALANCE
+  - type: mapToAvro
+    sourceLayout: USER_AND_BALANCE
+    targetSchema: CreditFile.avro
+    mapping:
+      name: user.name
+      age: user.age
+      accountId: account.number
+      description: account.description
+      balance: account.balance
 
 
 приклад CreditFile.avro 

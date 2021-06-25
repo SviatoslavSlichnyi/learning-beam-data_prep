@@ -1,7 +1,9 @@
 package com.learning.beam.transform.actions;
 
-import com.learning.beam.common.ProfileConfigs;
+import com.learning.beam.common.ProfileConfigsHelper;
 import com.learning.beam.entity.Table;
+import com.learning.beam.entity.config.ProfileConfig;
+import com.learning.beam.entity.config.ProfileConfig.Action.ValidationAction;
 import com.learning.beam.transform.actions.validation.NonNull;
 import com.learning.beam.transform.actions.validation.Positive;
 import com.learning.beam.transform.actions.validation.ValidationConstraint;
@@ -15,18 +17,16 @@ import java.util.stream.Collectors;
 public class ValidationActionDoFn extends DoFn<Table, Table> {
 
     private final Map<String, ValidationConstraint> constraintList;
-    private final Map<String, List<Map<String, String>>> actionsByRecordType;
+    private final Map<String, List<ValidationAction>> actionsByRecordType;
 
     public ValidationActionDoFn() {
         this.constraintList = initValidationRules();
-        List<Map<String, String>> actions = ProfileConfigs.getActions();
-        this.actionsByRecordType = groupValidationActionsByRecordType(actions);
+        this.actionsByRecordType = groupValidationActionsByRecordType(ProfileConfigsHelper.getProfileConfig().getAction());
     }
 
-    private Map<String, List<Map<String, String>>> groupValidationActionsByRecordType(List<Map<String, String>> actions) {
-        return actions.stream()
-                .filter(act -> act.get("type").equals("validate"))
-                .collect(Collectors.groupingBy(act -> act.get("recordType")));
+    private Map<String, List<ValidationAction>> groupValidationActionsByRecordType(ProfileConfig.Action actions) {
+        return actions.getValidationActions().stream()
+                .collect(Collectors.groupingBy(ValidationAction::getRecordType));
     }
 
     private static Map<String, ValidationConstraint> initValidationRules() {
@@ -41,12 +41,12 @@ public class ValidationActionDoFn extends DoFn<Table, Table> {
     @ProcessElement
     public void processElement(@Element Table table, OutputReceiver<Table> receiver) {
         String recordType = table.getType(); // BALANCE
-        List<Map<String, String>> actionToApply = actionsByRecordType.get(recordType);
+        List<ValidationAction> actionToApply = actionsByRecordType.get(recordType);
 
         boolean isValid = true;
 
-        for (Map<String, String> act : actionToApply) {
-            String constraint = act.get("constraint");
+        for (ValidationAction act : actionToApply) {
+            String constraint = act.getConstraint();
             ValidationConstraint validationConstraint = constraintList.get(constraint);
             boolean validationResult = validationConstraint.validate(table, act);
             if (!validationResult) {

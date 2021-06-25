@@ -1,6 +1,6 @@
 package com.learning.beam;
 
-import com.learning.beam.common.ProfileConfigs;
+import com.learning.beam.common.ProfileConfigsHelper;
 import com.learning.beam.entity.Table;
 import com.learning.beam.option.DataPrepOptions;
 import com.learning.beam.transform.ApplyActionsTransform;
@@ -22,7 +22,7 @@ public class Main {
     private static void runDataPrepAnalyzer(DataPrepOptions options) throws IOException {
         Pipeline p = Pipeline.create(options);
 
-        ProfileConfigs.initWithOptions(options);
+        ProfileConfigsHelper.initWithOptions(options);
 
         // read lines from csv files
         PCollection<String> lines = p.apply(new ReadCsvTransform(options.getInputFiles()));
