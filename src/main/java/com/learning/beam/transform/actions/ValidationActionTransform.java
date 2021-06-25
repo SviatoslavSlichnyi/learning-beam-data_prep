@@ -20,11 +20,12 @@ public class ValidationActionTransform extends DoFn<Table, Table> {
     public ValidationActionTransform() {
         this.constraintList = initValidationRules();
         List<Map<String, String>> actions = ProfileConfigs.getActions();
-        this.actionsByRecordType = groupActionsByRecordType(actions);
+        this.actionsByRecordType = groupValidationActionsByRecordType(actions);
     }
 
-    private Map<String, List<Map<String, String>>> groupActionsByRecordType(List<Map<String, String>> actions) {
+    private Map<String, List<Map<String, String>>> groupValidationActionsByRecordType(List<Map<String, String>> actions) {
         return actions.stream()
+                .filter(act -> act.get("type").equals("validate"))
                 .collect(Collectors.groupingBy(act -> act.get("recordType")));
     }
 
@@ -40,7 +41,7 @@ public class ValidationActionTransform extends DoFn<Table, Table> {
 
     @ProcessElement
     public void processElement(@Element Table table, OutputReceiver<Table> receiver) {
-        String recordType = table.getType();
+        String recordType = table.getType(); // BALANCE
         List<Map<String, String>> actionToApply = actionsByRecordType.get(recordType);
 
         actionToApply.forEach(act -> {
