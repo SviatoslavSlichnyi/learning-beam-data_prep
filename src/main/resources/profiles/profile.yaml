@@ -18,15 +18,15 @@ actions:
   - type: validate
     recordType: "USER"
     field: accountId
-    constraint: com.example.validation.NonNull
+    constraint: com.learning.beam.transform.actions.validation.NonNull
   - type: validate
     recordType: "BALANCE"
     field: accountId
-    constraint: com.example.validation.NonNull
+    constraint: com.learning.beam.transform.actions.validation.NonNull
   - type: validate
     recordType: "BALANCE"
     field: balance
-    constraint: com.example.validation.Positive
+    constraint: com.learning.beam.transform.actions.validation.Positive
   - type: groupBy
     recordTypes:
       - USER
