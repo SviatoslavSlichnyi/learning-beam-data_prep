@@ -21,7 +21,7 @@ public class ValidationActionDoFn extends DoFn<Table, Table> {
 
     public ValidationActionDoFn() {
         this.constraintList = initValidationRules();
-        this.actionsByRecordType = groupValidationActionsByRecordType(ProfileConfigsHelper.getProfileConfig().getAction());
+        this.actionsByRecordType = groupValidationActionsByRecordType(ProfileConfigsHelper.getActions());
     }
 
     private Map<String, List<ValidationAction>> groupValidationActionsByRecordType(ProfileConfig.Action actions) {

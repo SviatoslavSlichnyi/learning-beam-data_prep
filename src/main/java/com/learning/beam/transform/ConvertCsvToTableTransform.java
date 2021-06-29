@@ -21,7 +21,7 @@ public class ConvertCsvToTableTransform extends PTransform<PCollection<String>, 
     }
 
     private Map<String, ProfileConfig.FieldTypes> initFieldTypes() {
-        return ProfileConfigsHelper.getProfileConfig().getLayouts();
+        return ProfileConfigsHelper.getLayouts();
     }
 
     @Override

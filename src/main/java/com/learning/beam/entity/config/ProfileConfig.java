@@ -3,17 +3,15 @@ package com.learning.beam.entity.config;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+import org.apache.avro.Schema;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-@AllArgsConstructor
-@Getter
-@ToString
-public class ProfileConfig implements Serializable {
-    private final Map<String, FieldTypes> layouts;
-    private final Action action;
+public final class ProfileConfig implements Serializable {
+
+    private ProfileConfig() {}
 
     @AllArgsConstructor
     @Getter
@@ -55,7 +53,7 @@ public class ProfileConfig implements Serializable {
         public static class MapToAvroAction implements Serializable {
             private final String sourceLayout;
             private final String targetSchema;
-            private final Map<String, String> mapping;
+            private final Schema schema;
         }
     }
 }

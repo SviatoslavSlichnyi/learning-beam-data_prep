@@ -2,6 +2,7 @@ package com.learning.beam.common;
 
 import com.learning.beam.entity.config.ProfileConfig;
 import com.learning.beam.option.DataPrepOptions;
+import org.apache.avro.Schema;
 
 import java.io.IOException;
 import java.util.List;
@@ -10,7 +11,8 @@ import java.util.stream.Collectors;
 
 public class ProfileConfigsHelper {
 
-    private static ProfileConfig profileConfig;
+    private static Map<String, ProfileConfig.FieldTypes> layouts;
+    private static ProfileConfig.Action actions;
 
     /**
      * Article: https://www.baeldung.com/java-snake-yaml
@@ -20,15 +22,8 @@ public class ProfileConfigsHelper {
      */
     public static void initWithOptions(DataPrepOptions options) throws IOException {
         Map<String, Object> profileConfigsMap = SnakeYamlReader.readYamlFile(options.getProfile());
-        profileConfig = parse(profileConfigsMap);
-    }
-
-    private static ProfileConfig parse(Map<String, Object> profileConfigsMap) {
-        Map<String, ProfileConfig.FieldTypes> layouts = parseLayouts(
-                (Map<String, Map<String, String>>) profileConfigsMap.get("layouts"));
-        ProfileConfig.Action actions = parseAction(
-                (List<Map<String, ?>>) profileConfigsMap.get("actions"));
-        return new ProfileConfig(layouts, actions);
+        layouts = parseLayouts((Map<String, Map<String, String>>) profileConfigsMap.get("layouts"));
+        actions = parseAction((List<Map<String, ?>>) profileConfigsMap.get("actions"));
     }
 
     private static Map<String, ProfileConfig.FieldTypes> parseLayouts(Map<String, Map<String, String>> layouts) {
@@ -86,11 +81,23 @@ public class ProfileConfigsHelper {
         String sourceLayout = (String) act.get("sourceLayout");
         String targetSchema = (String) act.get("targetSchema");
         Map<String, String> mapping = (Map<String, String>) act.get("mapping");
+        Schema schema = parseActionMapMappingToSchema((Map<String, String>) act.get("mapping"));
 
-        return new ProfileConfig.Action.MapToAvroAction(sourceLayout, targetSchema, mapping);
+        return new ProfileConfig.Action.MapToAvroAction(sourceLayout, targetSchema, schema);
     }
 
-    public static ProfileConfig getProfileConfig() {
-        return profileConfig;
+    private static Schema parseActionMapMappingToSchema(Map<String, String> mapping) {
+        if (layouts == null) throw new RuntimeException("layouts must be initialize before actions");
+
+        // todo: mapping -> layouts
+        return null;
+    }
+
+    public static Map<String, ProfileConfig.FieldTypes> getLayouts() {
+        return layouts;
+    }
+
+    public static ProfileConfig.Action getActions() {
+        return actions;
     }
 }

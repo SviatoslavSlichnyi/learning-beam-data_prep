@@ -22,7 +22,7 @@ public class GroupByActionTransform extends PTransform<PCollection<Table>, PColl
         List<PCollection<Table>> mappedTables = new ArrayList<>();
 
         // get from ProfileConfigs List<> actions with "groupBy"
-        List<GroupByAction> groupByActions = ProfileConfigsHelper.getProfileConfig().getAction().getGroupByActions();
+        List<GroupByAction> groupByActions = ProfileConfigsHelper.getActions().getGroupByActions();
 
         // forEach of GroupBy actions
         for (GroupByAction action : groupByActions) {

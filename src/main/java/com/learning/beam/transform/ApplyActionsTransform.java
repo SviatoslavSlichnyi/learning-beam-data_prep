@@ -2,6 +2,7 @@ package com.learning.beam.transform;
 
 import com.learning.beam.entity.Table;
 import com.learning.beam.transform.actions.GroupByActionTransform;
+import com.learning.beam.transform.actions.MapToAvroActionTransform;
 import com.learning.beam.transform.actions.ValidationActionDoFn;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.PTransform;
@@ -22,7 +23,7 @@ public class ApplyActionsTransform extends PTransform<PCollection<Table>, PDone>
             System.out.println(element);
         }}));
 
-//        groupedTables.apply(new MapToAvroActionTransform());
+        groupedTables.apply(new MapToAvroActionTransform());
 
         return PDone.in(input.getPipeline());
     }
