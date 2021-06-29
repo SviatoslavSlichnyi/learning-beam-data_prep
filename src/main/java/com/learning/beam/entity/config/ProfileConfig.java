@@ -4,28 +4,28 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 @AllArgsConstructor
 @Getter
 @ToString
-public class ProfileConfig {
-    private final List<Layout> layouts;
+public class ProfileConfig implements Serializable {
+    private final Map<String, FieldTypes> layouts;
     private final Action action;
 
     @AllArgsConstructor
     @Getter
     @ToString
-    public static class Layout {
-        private final String layoutType;
-        private final Map<String, String> fieldTypes;
+    public static class FieldTypes implements Serializable {
+        private final Map<String, String> types;
     }
 
     @AllArgsConstructor
     @Getter
     @ToString
-    public static class Action {
+    public static class Action implements Serializable {
         private final List<ValidationAction> validationActions;
         private final List<GroupByAction> groupByActions;
         private final List<MapToAvroAction> mapToAvroActions;
@@ -33,7 +33,7 @@ public class ProfileConfig {
         @AllArgsConstructor
         @Getter
         @ToString
-        public static class ValidationAction {
+        public static class ValidationAction implements Serializable {
             private final String type;
             private final String recordType;
             private final String field;
@@ -43,7 +43,7 @@ public class ProfileConfig {
         @AllArgsConstructor
         @Getter
         @ToString
-        public static class GroupByAction {
+        public static class GroupByAction implements Serializable {
             private final List<String> recordTypes;
             private final String gropingKey;
             private final String resultRecordName;
@@ -52,7 +52,7 @@ public class ProfileConfig {
         @AllArgsConstructor
         @Getter
         @ToString
-        public static class MapToAvroAction {
+        public static class MapToAvroAction implements Serializable {
             private final String sourceLayout;
             private final String targetSchema;
             private final Map<String, String> mapping;

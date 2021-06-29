@@ -1,6 +1,7 @@
 package com.learning.beam.entity;
 
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class MapTable implements Table {
 
@@ -57,5 +58,14 @@ public class MapTable implements Table {
     @Override
     public boolean containsFieldType(String fieldName) {
         return fieldsType.containsKey(fieldName);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", MapTable.class.getSimpleName() + "[", "]")
+                .add("type='" + type + "'")
+                .add("rows=" + rows)
+                .add("fieldsType=" + fieldsType)
+                .toString();
     }
 }

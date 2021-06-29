@@ -24,17 +24,16 @@ public class ProfileConfigsHelper {
     }
 
     private static ProfileConfig parse(Map<String, Object> profileConfigsMap) {
-        List<ProfileConfig.Layout> layouts = parseLayouts(
+        Map<String, ProfileConfig.FieldTypes> layouts = parseLayouts(
                 (Map<String, Map<String, String>>) profileConfigsMap.get("layouts"));
         ProfileConfig.Action actions = parseAction(
                 (List<Map<String, ?>>) profileConfigsMap.get("actions"));
         return new ProfileConfig(layouts, actions);
     }
 
-    private static List<ProfileConfig.Layout> parseLayouts(Map<String, Map<String, String>> layouts) {
+    private static Map<String, ProfileConfig.FieldTypes> parseLayouts(Map<String, Map<String, String>> layouts) {
         return layouts.entrySet().stream()
-                .map(layout -> new ProfileConfig.Layout(layout.getKey(), layout.getValue()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> new ProfileConfig.FieldTypes(entry.getValue())));
     }
 
     private static ProfileConfig.Action parseAction(List<Map<String, ?>> actions) {

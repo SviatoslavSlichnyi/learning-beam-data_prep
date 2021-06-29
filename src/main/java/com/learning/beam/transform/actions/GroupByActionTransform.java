@@ -19,15 +19,16 @@ public class GroupByActionTransform extends PTransform<PCollection<Table>, PColl
         List<PCollection<Table>> mappedTables = new ArrayList<>();
 
         // get from ProfileConfigs List<> layouts which contains "_AND_"
-        List<ProfileConfig.Layout> profileLayouts = ProfileConfigsHelper.getProfileConfig().getLayouts();
-        List<ProfileConfig.Layout> andLayouts = profileLayouts.stream()
-                .filter(layout -> layout.getLayoutType().equals("_AND_"))
+        Map<String, ProfileConfig.FieldTypes> layoutList = ProfileConfigsHelper.getProfileConfig().getLayouts();
+        Set<String> layoutTypes = layoutList.keySet();
+        List<String> andLayoutTypes = layoutTypes.stream()
+                .filter(layoutType -> layoutType.equals("_AND_"))
                 .collect(Collectors.toList());
 
         // forEach of layouts
-        for (ProfileConfig.Layout layout : andLayouts) {
+        for (String layoutType : andLayoutTypes) {
             // split layout<USER_AND_BALANCE> into List<> types "USER", "BALANCE"...
-            List<String> recordTypes = Arrays.asList(layout.getLayoutType().split("_AND_"));
+            List<String> recordTypes = Arrays.asList(layoutType.split("_AND_"));
 
             // filter input: contains at least one of List<> types
             PCollection<Table> filteredTables = input.apply(Filter.by(
@@ -35,7 +36,7 @@ public class GroupByActionTransform extends PTransform<PCollection<Table>, PColl
 
             // groupBy "<gropingKey>" from ProfileConfigs | example: "accountId" field
             // KV<gropingKey, Table>
-            Map<String, String> layoutConfigs = layout.getFieldTypes();
+            Map<String, String> layoutConfigs = layoutList.get(layoutType).getTypes();
             String gropingKey = layoutConfigs.get("gropingKey");
             PCollection<KV<String, Table>> convertTableToKVWithGroupingKey = filteredTables.apply(WithKeys.of(
                     (SerializableFunction<Table, String>) table -> table.get(gropingKey)));
@@ -45,7 +46,6 @@ public class GroupByActionTransform extends PTransform<PCollection<Table>, PColl
 
             // map KV<gropingKey, Iterable<Table>> => Table<USER_AND_BALANCE>
             groupedTables.apply(MapElements.into(TypeDescriptor.of(Table.class)).via(groupedTableKV -> {
-                String type = layout.getLayoutType();
                 Map<String, String> rows = new HashMap<>();
                 Map<String, String> fieldTypes = new HashMap<>();
 
@@ -54,7 +54,7 @@ public class GroupByActionTransform extends PTransform<PCollection<Table>, PColl
                     fieldTypes.putAll(table.getFieldsType());
                 });
 
-                return new MapTable(type, rows, fieldTypes);
+                return new MapTable(layoutType, rows, fieldTypes);
             }));
 
         }

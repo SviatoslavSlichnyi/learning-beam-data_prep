@@ -1,8 +1,9 @@
 package com.learning.beam.entity;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public interface Table {
+public interface Table extends Serializable {
 
     String getType();
 
