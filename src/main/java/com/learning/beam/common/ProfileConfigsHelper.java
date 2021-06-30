@@ -3,7 +3,6 @@ package com.learning.beam.common;
 import com.learning.beam.entity.config.ProfileConfig;
 import com.learning.beam.option.DataPrepOptions;
 import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import org.apache.beam.sdk.schemas.utils.AvroUtils;
 
 import java.io.IOException;
@@ -83,52 +82,20 @@ public class ProfileConfigsHelper {
         String sourceLayout = (String) act.get("sourceLayout");
         String targetSchema = (String) act.get("targetSchema");
         Map<String, String> mapping = (Map<String, String>) act.get("mapping");
-        Schema avroSchema = parseActionMapMappingToSchemaHardCode(act, mapping);
+        Schema avroSchema = parseActionMapMappingToSchema(act, mapping);
         org.apache.beam.sdk.schemas.Schema beamSchema = AvroUtils.toBeamSchema(avroSchema);
 
         return new ProfileConfig.Action.MapToAvroAction(sourceLayout, targetSchema, mapping, avroSchema, beamSchema);
     }
 
-    private static Schema parseActionMapMappingToSchemaHardCode(Map<String, Object> act, Map<String, String> mapping) {
+    private static Schema parseActionMapMappingToSchema(Map<String, Object> act, Map<String, String> mapping) {
         if (layouts == null) throw new RuntimeException("layouts must be initialize before actions");
 
         Map<String, String> fieldTypes = layouts.get((String) act.get("sourceLayout")).getTypes();
-
-
         String targetSchema = (String) act.get("targetSchema");
         String recordName = targetSchema.substring(0, targetSchema.indexOf('.'));
 
-        Schema userSchema = SchemaBuilder.record("user")
-                .namespace("com.learning.beam.entity")
-                .fields()
-                    .name("name")
-                        .type(fieldTypes.get("name")).noDefault()
-                    .name("age")
-                        .type(fieldTypes.get("age")).noDefault()
-                .endRecord();
-
-        Schema accountSchema = SchemaBuilder.record("account")
-                .namespace("com.learning.beam.entity")
-                .fields()
-                    .name("number")
-                        .type(fieldTypes.get("accountId")).noDefault()
-                    .name("description")
-                        .type(fieldTypes.get("description")).noDefault()
-                    .name("balance")
-                        .type(fieldTypes.get("balance")).noDefault()
-                .endRecord();
-
-
-        Schema recordSchema = SchemaBuilder.record(recordName)
-                .namespace("com.learning.beam.entity")
-                .fields()
-                .name("user")
-                    .type(userSchema).noDefault()
-                .name("account")
-                    .type(accountSchema).noDefault()
-                .endRecord();
-
-        return recordSchema;
+        return MappingSchemaBuilder.parse(recordName, mapping, fieldTypes);
     }
 
     public static Map<String, ProfileConfig.FieldTypes> getLayouts() {
