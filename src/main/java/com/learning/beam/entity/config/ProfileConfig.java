@@ -53,6 +53,7 @@ public final class ProfileConfig implements Serializable {
         public static class MapToAvroAction implements Serializable {
             private final String sourceLayout;
             private final String targetSchema;
+            private final Map<String, String> mapping;
             private final Schema schema;
         }
     }

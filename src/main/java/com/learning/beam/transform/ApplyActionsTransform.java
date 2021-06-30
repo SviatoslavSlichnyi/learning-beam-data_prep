@@ -25,6 +25,6 @@ public class ApplyActionsTransform extends PTransform<PCollection<Table>, PDone>
 
         groupedTables.apply(new MapToAvroActionTransform());
 
-        return PDone.in(input.getPipeline());
+        return PDone.in(groupedTables.getPipeline());
     }
 }

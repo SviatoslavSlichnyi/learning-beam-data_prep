@@ -3,6 +3,7 @@ package com.learning.beam.common;
 import com.learning.beam.entity.config.ProfileConfig;
 import com.learning.beam.option.DataPrepOptions;
 import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 
 import java.io.IOException;
 import java.util.List;
@@ -72,7 +73,7 @@ public class ProfileConfigsHelper {
 
     private static List<ProfileConfig.Action.MapToAvroAction> parseActionMapToAvroList(List<Map<String, ?>> actions) {
         return actions.stream()
-                .filter(act -> act.get("type").equals("groupBy"))
+                .filter(act -> act.get("type").equals("mapToAvro"))
                 .map(act -> parseActionMapToAvro((Map<String, Object>) act))
                 .collect(Collectors.toList());
     }
@@ -81,16 +82,51 @@ public class ProfileConfigsHelper {
         String sourceLayout = (String) act.get("sourceLayout");
         String targetSchema = (String) act.get("targetSchema");
         Map<String, String> mapping = (Map<String, String>) act.get("mapping");
-        Schema schema = parseActionMapMappingToSchema((Map<String, String>) act.get("mapping"));
+        Schema schema = parseActionMapMappingToSchemaHardCode(act, mapping);
 
-        return new ProfileConfig.Action.MapToAvroAction(sourceLayout, targetSchema, schema);
+        return new ProfileConfig.Action.MapToAvroAction(sourceLayout, targetSchema, mapping, schema);
     }
 
-    private static Schema parseActionMapMappingToSchema(Map<String, String> mapping) {
+    private static Schema parseActionMapMappingToSchemaHardCode(Map<String, Object> act, Map<String, String> mapping) {
         if (layouts == null) throw new RuntimeException("layouts must be initialize before actions");
 
-        // todo: mapping -> layouts
-        return null;
+        Map<String, String> fieldTypes = layouts.get((String) act.get("sourceLayout")).getTypes();
+
+
+        String targetSchema = (String) act.get("targetSchema");
+        String recordName = targetSchema.substring(0, targetSchema.indexOf('.'));
+
+        Schema userSchema = SchemaBuilder.record("user")
+                .namespace("com.learning.beam.entity")
+                .fields()
+                    .name("name")
+                        .type(fieldTypes.get("name")).noDefault()
+                    .name("age")
+                        .type(fieldTypes.get("age")).noDefault()
+                .endRecord();
+
+        Schema accountSchema = SchemaBuilder.record("account")
+                .namespace("com.learning.beam.entity")
+                .fields()
+                    .name("number")
+                        .type(fieldTypes.get("accountId")).noDefault()
+                    .name("description")
+                        .type(fieldTypes.get("description")).noDefault()
+                    .name("balance")
+                        .type(fieldTypes.get("balance")).noDefault()
+                .endRecord();
+
+
+        Schema recordSchema = SchemaBuilder.record(recordName)
+                .namespace("com.learning.beam.entity")
+                .fields()
+                .name("user")
+                    .type(userSchema).noDefault()
+                .name("account")
+                    .type(accountSchema).noDefault()
+                .endRecord();
+
+        return recordSchema;
     }
 
     public static Map<String, ProfileConfig.FieldTypes> getLayouts() {

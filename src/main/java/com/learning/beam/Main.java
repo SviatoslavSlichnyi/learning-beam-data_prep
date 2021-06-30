@@ -23,9 +23,9 @@ public class Main {
     }
 
     private static void runDataPrepAnalyzer(DataPrepOptions options) throws IOException {
-        Pipeline p = Pipeline.create(options);
-
         ProfileConfigsHelper.initWithOptions(options);
+
+        Pipeline p = Pipeline.create(options);
 
         // read lines from csv files
         PCollection<String> lines = p.apply(new ReadCsvTransform(options.getInputFiles()));
