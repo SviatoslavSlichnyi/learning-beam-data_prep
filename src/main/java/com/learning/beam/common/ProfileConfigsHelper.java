@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.learning.beam.common.Constrains.ProfileYaml;
+
 public class ProfileConfigsHelper {
 
     private static Map<String, ProfileConfig.FieldTypes> layouts;
@@ -23,8 +25,8 @@ public class ProfileConfigsHelper {
      */
     public static void initWithOptions(DataPrepOptions options) throws IOException {
         Map<String, Object> profileConfigsMap = SnakeYamlReader.readYamlFile(options.getProfile());
-        layouts = parseLayouts((Map<String, Map<String, String>>) profileConfigsMap.get("layouts"));
-        actions = parseAction((List<Map<String, ?>>) profileConfigsMap.get("actions"));
+        layouts = parseLayouts((Map<String, Map<String, String>>) profileConfigsMap.get(ProfileYaml.LAYOUTS));
+        actions = parseAction((List<Map<String, ?>>) profileConfigsMap.get(ProfileYaml.ACTIONS));
     }
 
     private static Map<String, ProfileConfig.FieldTypes> parseLayouts(Map<String, Map<String, String>> layouts) {

@@ -16,15 +16,7 @@ public class ReadCsvTransform extends PTransform<PBegin, PCollection<String>> {
 
     @Override
     public PCollection<String> expand(PBegin input) {
-        // https://medium.com/@mohamed.t.esmat/apache-beam-bites-10b8ded90d4c
-        PCollection<String> lines = input.apply(TextIO.read().from(inputFilePaths))
+        return input.apply(TextIO.read().from(inputFilePaths))
                 .setCoder(StringDelegateCoder.of(String.class));
-
-        // debug: verify if all lines were read
-//        lines.apply(ParDo.of(new DoFn<String, String>() {@ProcessElement public void processEl(@Element String element) {
-//                System.out.println(element);
-//        }})).setCoder(StringDelegateCoder.of(String.class));
-
-        return lines;
     }
 }

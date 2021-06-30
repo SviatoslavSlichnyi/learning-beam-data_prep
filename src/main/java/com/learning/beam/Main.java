@@ -34,10 +34,6 @@ public class Main {
         PCollection<Table> tables = lines.apply(new ConvertCsvToTableTransform())
                 .setCoder(SerializableCoder.of(Table.class));
 
-//        tables.apply(ParDo.of(new DoFn<Table, Table>() {@ProcessElement public void processEl(@Element Table element) {
-//            System.out.println(element);
-//        }}));
-
         // make some actions on data
         tables.apply(new ApplyActionsTransform());
 

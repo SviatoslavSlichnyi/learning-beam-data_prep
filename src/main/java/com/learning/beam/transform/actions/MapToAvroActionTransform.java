@@ -1,5 +1,6 @@
 package com.learning.beam.transform.actions;
 
+import com.learning.beam.common.FieldTypeParser;
 import com.learning.beam.common.OptionalHelper;
 import com.learning.beam.common.ProfileConfigsHelper;
 import com.learning.beam.entity.Table;
@@ -89,28 +90,13 @@ public class MapToAvroActionTransform extends PTransform<PCollection<Table>, PCo
                         Map.Entry::getValue,
                         entry -> {
                             String fieldName = entry.getKey();
-                            return parseField(table.get(fieldName), table.getFieldType(fieldName));
+                            return FieldTypeParser.parseField(table.get(fieldName), table.getFieldType(fieldName));
                         })
                 );
 
         Row row = Row.withSchema(beamSchema).withFieldValues(fieldValues).build();
         GenericRecord record = AvroUtils.toGenericRecord(row, schema);
         return KV.of(table.getType(), record);
-    }
-
-    private static Object parseField(String fieldValue, String fieldType) {
-        switch (fieldType) {
-            case "byte": return Byte.valueOf(fieldValue);
-            case "short": return Short.valueOf(fieldValue);
-            case "int": return Integer.valueOf(fieldValue);
-            case "long": return Long.valueOf(fieldValue);
-            case "float": return Float.valueOf(fieldValue);
-            case "double": return Double.valueOf(fieldValue);
-            case "boolean": return Boolean.valueOf(fieldValue);
-            case "char": return fieldValue.charAt(0);
-            case "string": return fieldValue;
-            default: throw new RuntimeException(fieldType + " is not supported");
-        }
     }
 
 }
