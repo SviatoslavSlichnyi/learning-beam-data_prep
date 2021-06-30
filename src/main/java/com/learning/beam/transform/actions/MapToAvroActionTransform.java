@@ -21,6 +21,7 @@ import org.apache.beam.sdk.values.Row;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class MapToAvroActionTransform extends PTransform<PCollection<Table>, PCollection<Table>> {
 
@@ -38,8 +39,8 @@ public class MapToAvroActionTransform extends PTransform<PCollection<Table>, PCo
 
         // forEach actions
         for (ProfileConfig.Action.MapToAvroAction action : mapToAvroActions) {
-            String jsonSchema = action.getSchema().toString();
-            String targetSchema = action.getTargetSchema();
+            String jsonSchema = action.getAvroSchema().toString();
+            String[] naming = action.getTargetSchema().split("[.]");
             String sourceLayout = action.getSourceLayout();
 
             // filter input
@@ -50,8 +51,8 @@ public class MapToAvroActionTransform extends PTransform<PCollection<Table>, PCo
             // key: recordType
             // value: GenericRecord
             PCollection<KV<String, GenericRecord>> records = filteredTables.apply(
-                    MapElements.via(mapTableToKVFn(action.getSchema().toString())))
-                    .setCoder(KvCoder.of(StringDelegateCoder.of(String.class), AvroCoder.of(GenericRecord.class, action.getSchema())));
+                    MapElements.via(mapTableToKVFn(action.getAvroSchema().toString(), action.getMapping())))
+                    .setCoder(KvCoder.of(StringDelegateCoder.of(String.class), AvroCoder.of(GenericRecord.class, action.getAvroSchema())));
 
             // write into file
             records.apply("Writing to Files",
@@ -62,7 +63,7 @@ public class MapToAvroActionTransform extends PTransform<PCollection<Table>, PCo
                         Contextful.fn((SerializableFunction<KV<String, GenericRecord>, GenericRecord>) KV::getValue),
                         AvroIO.sink(jsonSchema)
                     )
-                    .withNaming(key -> FileIO.Write.defaultNaming(targetSchema, ".avro"))
+                    .withNaming(key -> FileIO.Write.defaultNaming(naming[0], "." + naming[1]))
                     .to(options.getOutput())
             );
 
@@ -72,27 +73,44 @@ public class MapToAvroActionTransform extends PTransform<PCollection<Table>, PCo
         return input;
     }
 
-    public static SimpleFunction<Table, KV<String, GenericRecord>> mapTableToKVFn(String avroSchema) {
+    public static SimpleFunction<Table, KV<String, GenericRecord>> mapTableToKVFn(String avroSchema, Map<String, String> mapping) {
         return new SimpleFunction<>() {
             @Override
-            public KV<String, GenericRecord> apply(Table table) { return mapTableToKV(table, avroSchema); }
+            public KV<String, GenericRecord> apply(Table table) { return mapTableToKV(table, avroSchema, mapping); }
         };
     }
 
-    public static KV<String, GenericRecord> mapTableToKV(Table table, String avroSchema) {
-        Map<String, String> rows = table.getRows();
-
+    public static KV<String, GenericRecord> mapTableToKV(Table table, String avroSchema, Map<String, String> mapping) {
         Schema schema = new Schema.Parser().parse(avroSchema);
         org.apache.beam.sdk.schemas.Schema beamSchema = AvroUtils.toBeamSchema(schema);
-        Row row = Row.withSchema(beamSchema)
-                .withFieldValue("user.name", table.get("name"))
-                .withFieldValue("user.age", Long.valueOf(table.get("age")))
-                .withFieldValue("account.number", table.get("accountId"))
-                .withFieldValue("account.description", table.get("description"))
-                .withFieldValue("account.balance", Long.valueOf(table.get("balance")))
-                .build();
-        GenericRecord record = AvroUtils.toGenericRecord(row, schema);
 
+        Map<String, Object> fieldValues = mapping.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getValue,
+                        entry -> {
+                            String fieldName = entry.getKey();
+                            return parseField(table.get(fieldName), table.getFieldType(fieldName));
+                        })
+                );
+
+        Row row = Row.withSchema(beamSchema).withFieldValues(fieldValues).build();
+        GenericRecord record = AvroUtils.toGenericRecord(row, schema);
         return KV.of(table.getType(), record);
     }
+
+    private static Object parseField(String fieldValue, String fieldType) {
+        switch (fieldType) {
+            case "byte": return Byte.valueOf(fieldValue);
+            case "short": return Short.valueOf(fieldValue);
+            case "int": return Integer.valueOf(fieldValue);
+            case "long": return Long.valueOf(fieldValue);
+            case "float": return Float.valueOf(fieldValue);
+            case "double": return Double.valueOf(fieldValue);
+            case "boolean": return Boolean.valueOf(fieldValue);
+            case "char": return fieldValue.charAt(0);
+            case "string": return fieldValue;
+            default: throw new RuntimeException(fieldType + " is not supported");
+        }
+    }
+
 }

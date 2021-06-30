@@ -3,7 +3,6 @@ package com.learning.beam.entity.config;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
-import org.apache.avro.Schema;
 
 import java.io.Serializable;
 import java.util.List;
@@ -54,7 +53,8 @@ public final class ProfileConfig implements Serializable {
             private final String sourceLayout;
             private final String targetSchema;
             private final Map<String, String> mapping;
-            private final Schema schema;
+            private final org.apache.avro.Schema avroSchema;
+            private final org.apache.beam.sdk.schemas.Schema beamSchema;
         }
     }
 }

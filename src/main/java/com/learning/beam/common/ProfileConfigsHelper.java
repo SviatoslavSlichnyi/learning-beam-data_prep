@@ -4,6 +4,7 @@ import com.learning.beam.entity.config.ProfileConfig;
 import com.learning.beam.option.DataPrepOptions;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
+import org.apache.beam.sdk.schemas.utils.AvroUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -82,9 +83,10 @@ public class ProfileConfigsHelper {
         String sourceLayout = (String) act.get("sourceLayout");
         String targetSchema = (String) act.get("targetSchema");
         Map<String, String> mapping = (Map<String, String>) act.get("mapping");
-        Schema schema = parseActionMapMappingToSchemaHardCode(act, mapping);
+        Schema avroSchema = parseActionMapMappingToSchemaHardCode(act, mapping);
+        org.apache.beam.sdk.schemas.Schema beamSchema = AvroUtils.toBeamSchema(avroSchema);
 
-        return new ProfileConfig.Action.MapToAvroAction(sourceLayout, targetSchema, mapping, schema);
+        return new ProfileConfig.Action.MapToAvroAction(sourceLayout, targetSchema, mapping, avroSchema, beamSchema);
     }
 
     private static Schema parseActionMapMappingToSchemaHardCode(Map<String, Object> act, Map<String, String> mapping) {

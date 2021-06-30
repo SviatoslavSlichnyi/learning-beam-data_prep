@@ -18,7 +18,7 @@ public class ReadAvro {
         DataPrepOptions options =
                 PipelineOptionsFactory.fromArgs(args).withValidation().as(DataPrepOptions.class);
         ProfileConfigsHelper.initWithOptions(options);
-        Schema schema = ProfileConfigsHelper.getActions().getMapToAvroActions().get(0).getSchema();
+        Schema schema = ProfileConfigsHelper.getActions().getMapToAvroActions().get(0).getAvroSchema();
         File avroPath = Paths.get("C:\\Users\\Sviatoslav_Slichnyi\\Documents\\epam\\Project\\EQFX\\Tasks\\data-prep\\src\\main\\resources\\output\\CreditFile.avro-00000-of-00001.avro")
                 .toFile();
 
