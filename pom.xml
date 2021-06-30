@@ -31,6 +31,7 @@
         <hamcrest.version>2.1</hamcrest.version>
         <joda.version>2.10.10</joda.version>
         <libraries-bom.version>16.3.0</libraries-bom.version>
+        <snakeyaml.version>1.29</snakeyaml.version>
     </properties>
 
     <repositories>
@@ -115,13 +116,6 @@
             <version>${slf4j.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <version>${slf4j.version}</version>
-            <!-- When loaded at runtime this will wire up slf4j to the JUL backend -->
-            <scope>runtime</scope>
-        </dependency>
 
         <!-- Hamcrest and JUnit are required dependencies of PAssert,
      which is used in the main code of DebuggingWordCount example. -->
@@ -162,6 +156,12 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>${snakeyaml.version}</version>
         </dependency>
 
     </dependencies>

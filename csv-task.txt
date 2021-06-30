@@ -1,0 +1,88 @@
+Усім привіт! Дякую що виконали завдання EventAggregator
+Сподіваюся що всі добре відпочили на вихідних тому пропоную приступити до наступного 
+
+Написати DataFlow job на GCP: Data Prep реквайрменти наступні:
+
+ job має читати файли з одного GCS бакета і декларативним чином групувати/конвертувати рекорди в .avro формат "CreditFile"
+
+
+при запуску в job передається 
+--inputPath (GCS шлях по якому лежатимуть source .csv файли )
+--profile (GCS шлях по якому лежить profile.yaml з конфігурацією )
+--outputPath (GCS шлях куди має записатися .avro результат )
+
+ в файлі profile.yaml має бути можливість вказати layout для csv (дати назви колонкам)
+ в csv може бути довільна кількість різних record type які визначаються першою колонкою 
+і можуть бути обєднані певним "key" для того щоб згрупувати їх в один "CreditFile"
+
+крім цього потрібно декларативно описати валідаційні дії для полів з input файлу 
+
+наприклад файл виглядає наступним чином: 
+USER, account1, Ivan, 26 
+BALANCE, account1, Active, 200
+
+в profile.yaml потрібно дати назву полям, в форматі:
+layouts:
+  USER:
+    accountId: string
+    name: string
+    age: long
+  BALANCE:
+    accountId: string
+    description: string
+    balance: long
+  USER_AND_BALANCE:
+    name: string
+    age: long
+    accountId: string
+    description: string
+    balance: long 
+
+
+а також описати дії які потрібно зробити з кожним рекордом з вхідного файлу щоб замапити на target avro record 
+
+
+
+приклад конфігурації: 
+actions:
+  - type: validate
+    recordType: "USER"
+    field: accountId
+    constraint: com.example.validation.NonNull
+  - type: validate
+    recordType: "BALANCE"
+    field: accountId
+    constraint: com.example.validation.NonNull
+  - type: validate
+    recordType: "BALANCE"
+    field: balance
+    constraint: com.example.validation.Positive
+  - type: groupBy
+    recordTypes:
+      - USER
+      - BALANCE
+    gropingKey: accountId
+    resultRecordName: USER_AND_BALANCE
+  - type: mapToAvro
+    sourceLayout: USER_AND_BALANCE
+    targetSchema: CreditFile.avro
+    mapping:
+      name: user.name
+      age: user.age
+      accountId: account.number
+      description: account.description
+      balance: account.balance
+
+
+приклад CreditFile.avro 
+{
+	"user" : { 
+		"name": "Ivan",
+		"age": 32 
+	}, 
+	"account": {
+		"accountId": "123", 
+		"description": "Avtive", 
+		"balance": 200 
+	}
+}
